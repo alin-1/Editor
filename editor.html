@@ -1,0 +1,691 @@
+<!-- by Alin -->
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Editor</title>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+		<style>
+			body, input, button {
+			font-family: "Roboto", Verdana, sans-serif;
+			font-size: 13px;
+			background: #F0F0F0;
+			}
+			
+			div {
+			float: left;
+			}
+			
+			button, .openfilelabel {
+			margin: 0;
+			border: 0;
+			background: #C4D2D5;
+			border-radius: 6px;
+			}
+			
+			input, select {
+			background: none;
+			margin: 0;
+			border: 2px solid #C4D2D5;
+			border-radius: 6px;
+			}
+			
+			.small-button {
+			width: 40px;
+			height: 32px;
+			}
+			
+			.medium-button {
+			width: 76px;
+			height: 32px;
+			}
+			
+			.big-button {
+			width: 80px;
+			height: 70px;
+			}
+			
+			.openfilelabel {
+			width: 40px;
+			height: 25px;
+			text-align: center;
+			padding-top: 7px;
+			background: #C4D2D5;
+			}
+			
+			textarea {
+			font-family: "Consolas", monospace;
+			background-color: #F0F0F0;
+			border: solid 2px #C4D2D5;
+			margin: 0;
+			}
+			
+			label {
+			display: inline-block;
+			}
+			
+			.toolbox-group {
+			float: left;
+			display: block;
+			margin: 0 50px 6px 0;
+			}
+			
+			.toolbox-item {
+			float: left;
+			margin-right: 10px;
+			}
+		</style>
+	</head>
+	<body>
+		<form name="myform">
+			<div class="toolbox-group">
+				<!-- OPERATIONS AND PRESETS -->
+				<div>
+					<select id="operationsList" style="width: 155px; padding: 6px 0 5px 0; margin: 0 0 6px 0; background: #ddeeff;" onchange="selectOperation();">
+						<option value="operations">Operations</option>
+						<option value="deleteline">Delete line</option>
+						<option value="duplicateline">Duplicate line</option>
+						<option value="empty">&nbsp;</option>
+						<option value="deleteblanklines">Delete blank lines</option>
+						<option value="deletetrailingspaces">Delete trailing spaces</option>
+						<option value="deletewhitespace">Delete whitespace</option>
+						<option value="sortlines">Sort lines</option>
+						<option value="empty">&nbsp;</option>
+						<option value="uppercase">Uppercase</option>
+						<option value="lowercase">Lowercase</option>
+						<option value="titlecase">Titlecase</option>
+						<option value="empty">&nbsp;</option>
+						<option value="urldecode">URL Decode</option>
+						<option value="urlencode">URL Encode</option>
+					</select>
+					<select id="presetsList" style="width: 163px; padding: 6px 0 5px 0; background: #ddffee;" onchange="selectPreset();">
+						<option value="presets">Presets</option>
+						<option value="delete1">Delete -NxN</option>
+						<option value="delete2">Delete /?text</option>
+						<option value="delete3">Delete anything after .jpg</option>
+						<option value="removemp3m4a">Delete .mp3 and .m4a</option>
+						<option value="removethumbs">Delete thumbs/</option>
+						<option value="http">Add http://</option>
+						<option value="jpg">Add newline after .jpg</option>
+						<option value="replaceslashes">Replace /</option>
+						<option value="yt2rym">YouTube links to RYM</option>
+						<option value="empty">&nbsp;</option>
+						<option value="blogspot">Blogspot</option>
+						<option value="diymag">DIY Mag</option>
+						<option value="flickrid">Flickr ID</option>
+						<option value="instagram">Instagram</option>
+						<option value="photoshelter">Photoshelter</option>
+						<option value="pinterest">Pinterest</option>
+						<option value="resize1000x1000">resize-1000x1000</option>
+						<option value="smugmug">SmugMug</option>
+						<option value="squarespace">Squarespace</option>
+						<option value="thelineofbestfit">The Line of Best Fit</option>
+						<option value="tumblr">Tumblr</option>
+						<option value="twitter">Twitter</option>
+						<option value="zimbio">Zimbio</option>
+					</select>
+				</div>
+				<br />
+				
+				<!-- MAIN BUTTONS -->
+				<div>
+					<input type="reset" class="medium-button" style="border: 0; background: #C4D2D5;" value="Clear all" onclick="javascript: textareaFocus();">
+					<button type="button" class="medium-button" onclick="clearSettings();">Clear set</button>
+					<button type="button" class="medium-button" onclick="clearText();">Clear txt</button>
+					<input id="openfile" type="file" class="small-button" style="display: none;" onclick="openFile();"></input>
+					<label for="openfile" class="openfilelabel">Open</label>
+					<button type="button" class="small-button" onclick="saveTextToFile();">Save</button>
+				</div>
+			</div>
+			
+			<!-- REPLACE -->
+			<div class="toolbox-group">
+				<div class="toolbox-item">
+					<input type="text" id="texttoreplace" style="width: 196px; margin-bottom: 6px; padding: 5px 0 5px 0;" value="">
+					<br />
+					<input type="text" id="replacedtext" style="width: 196px; padding: 5px 0 5px 0; display: inline;" value="">
+				</div>
+				<div class="toolbox-item">
+					<input type="checkbox" id="matchcase" style="margin: 10px 5px 0 0;">
+					<label for="matchcase" style="display: inline;">Case</label>
+					<br />
+					<input type="checkbox" id="newline" style="margin: 20px 5px 0 0;">
+					<label for="newline" style="display: inline;">Line</label>
+				</div>
+				<div>
+					<button type="button" class="big-button" onclick="replaceText();">Replace</button>
+				</div>
+			</div>
+			
+			<!-- INSERT -->
+			<div class="toolbox-group">
+				<div class="toolbox-item">
+					<input type="text" id="texttoinsert" style="width: 196px; padding: 5px 0 5px 0;" value="">
+					<br />
+					<div style="margin: 9px 0 0 0">
+						<input type="radio" id="startposition" name="locationtoinsert" value="Start" checked style="margin-right: 4px" />
+						<label for="startposition" style="margin-right: 4px">Start</label>
+						<input type="radio" id="endposition" name="locationtoinsert" value="End" style="margin-right: 4px" />
+						<label for="endposition" style="margin-right: 4px">End</label>
+						<input type="radio" id="customposition" name="locationtoinsert" value="Col" style="margin-right: 4px" />
+						<label for="customposition" style="margin-right: 5px">Col</label>
+						<input type="number" id="textposition" style="width: 42px;" value="0"><br>
+					</div>
+				</div>
+				<div>
+					<button type="button" class="big-button" onclick="insertText();">Insert</button>
+				</div>
+			</div>
+			
+			<!-- COPY ALL -->
+			<div class="toolbox-group">
+				<button type="button" class="big-button" onclick="copyToClipboard(document.myform.textarea.value); selectAll('textarea');">Copy all</button>
+			</div>
+			
+			<!-- TEXTAREA -->
+			<div>
+				<textarea id="textarea" style="width: 98%;"></textarea>
+			</div>
+		</form>
+		
+		<script>
+			window.onresize = setTextareaSize();
+			
+			function setTextareaSize() {
+				var ta = document.getElementById('textarea');
+				ta.style.width = window.innerWidth - 40 + 'px';
+				ta.style.height = window.innerHeight - 100 + 'px';
+				document.getElementById('textarea').focus();
+			}
+			
+			// Copies a string to the clipboard. Must be called from within an 
+			// event handler such as click. May return false if it failed, but
+			// this is not always possible. Browser support for Chrome 43+, 
+			// Firefox 42+, Safari 10+, Edge and IE 10+.
+			// IE: The clipboard feature may be disabled by an administrator. By
+			// default a prompt is shown the first time the clipboard is 
+			// used (per session).
+			function copyToClipboard(text) {
+				if (window.clipboardData && window.clipboardData.setData) {
+					// IE specific code path to prevent textarea being shown while dialog is visible.
+					return clipboardData.setData("Text", text); 
+					
+					} else if (document.queryCommandSupported && document.queryCommandSupported("copy")) {
+					var textarea = document.createElement("textarea");
+					textarea.textContent = text;
+					textarea.style.position = "fixed";  // Prevent scrolling to bottom of page in MS Edge.
+					document.body.appendChild(textarea);
+					textarea.select();
+					
+					try {
+						return document.execCommand("copy");  // Security exception may be thrown by some browsers.
+						} catch (ex) {
+						console.warn("Copy to clipboard failed.", ex);
+						return false;
+						} finally {
+						document.body.removeChild(textarea);
+					}
+				}
+			}			
+			
+			function selectOperation() {
+				var selectBox = document.getElementById("operationsList");
+				var selectedOperation = selectBox.options[selectBox.selectedIndex].value;
+				
+				switch (selectedOperation) {
+					case 'uppercase': upperCase(); break;
+					case 'lowercase': lowerCase(); break;
+					case 'titlecase': titleCase(); break;
+					case 'deleteline': deleteLine(); break;
+					case 'duplicateline': duplicateLine(); break;
+					case 'sortlines': sortLines(); break;
+					case 'deleteblanklines': deleteBlankLines(); break;
+					case 'deletetrailingspaces': deleteTrailingSpaces(); break;
+					case 'deletewhitespace': deleteWhitespace(); break;
+					case 'urldecode': urlDecode(); break;
+					case 'urlencode': urlEncode(); break;
+				}
+				
+				document.myform.operationsList.value = "operations";
+			}
+			
+			function selectPreset() {
+				var selectBox = document.getElementById("presetsList");
+				var selectedPreset = selectBox.options[selectBox.selectedIndex].value;
+				
+				clearSettings();
+				document.myform.presetsList.value = selectedPreset;
+				
+				switch (selectedPreset) {
+					case 'presets':
+					document.myform.texttoreplace.value = "";
+					document.myform.replacedtext.value = "";
+					break;
+					case 'http':
+					document.myform.texttoinsert.value = "http://";
+					document.myform.startposition.checked = "true";
+					break;
+					case 'jpg':
+					document.myform.texttoreplace.value = ".jpg";
+					document.myform.newline.checked = "true";
+					break;
+					case 'yt2rym':
+					document.myform.texttoreplace.value = "https:\\/\\/www.youtube.com\\/watch\\?v=";
+					document.myform.replacedtext.value = "[YouTube ";
+					document.myform.texttoinsert.value = "]";
+					document.myform.endposition.checked = "true";
+					break;
+					case 'tumblr':
+					document.myform.texttoreplace.value = "_250|_400|_500|_540";
+					document.myform.replacedtext.value = "_1280";
+					break;
+					case 'diymag':
+					document.myform.texttoreplace.value = "\/_1500xAUTO_crop_center-center_75|\/_1500x1000_crop_center-center_75";
+					document.myform.replacedtext.value = "";
+					break;
+					case 'blogspot':
+					document.myform.texttoreplace.value = "s([0-9]+)\\/|s([0-9]+)-h\\/|s([0-9]+)-c\\/";
+					document.myform.replacedtext.value = "s4000/";
+					break;
+					case 'twitter':
+					document.myform.texttoinsert.value = ":large";
+					document.myform.endposition.checked = "true";
+					break;
+					case 'squarespace':
+					document.myform.texttoreplace.value = "\\?.*$";
+					document.myform.replacedtext.value = "";
+					document.myform.texttoinsert.value = "?format=original";
+					document.myform.endposition.checked = "true";
+					document.myform.starttext.value = "?";
+					document.myform.endtext.value = "";
+					break;
+					case 'photoshelter':
+					document.myform.texttoinsert.value = "/fit=4000x4000";
+					document.myform.endposition.checked = "true";
+					document.myform.starttext.value = "/";
+					document.myform.endtext.value = "";
+					break;
+					case 'instagram':
+					document.myform.texttoreplace.value = "s640x640\\/|c0.75.599.599\\/";
+					document.myform.replacedtext.value = "";
+					break;
+					case 'flickrid':
+					document.myform.texttoinsert.value = "https://www.flickr.com/photo.gne?id=";
+					document.myform.texttoreplace.value = "_.*";
+					break;
+					case 'zimbio':
+					document.myform.texttoreplace.value = "..jpg";
+					document.myform.replacedtext.value = "x.jpg";
+					break;
+					case 'resize1000x1000':
+					document.myform.texttoreplace.value = "resize-1000x1000";
+					document.myform.replacedtext.value = "resize-1600x1600";
+					break;
+					case 'removemp3m4a':
+					document.myform.texttoreplace.value = "\.mp3|\.m4a";
+					document.myform.replacedtext.value = "";
+					break;
+					case 'pinterest':
+					document.myform.texttoreplace.value = "236x\\/|564x\\/|736x\\/";
+					document.myform.replacedtext.value = "originals/";
+					break;
+					case 'replaceslashes':
+					document.myform.texttoreplace.value = "%2F";
+					document.myform.replacedtext.value = "/";
+					break;
+					case 'delete1':
+					document.myform.texttoreplace.value = "-\\d{2,4}x\\d{2,4}";
+					document.myform.replacedtext.value = "";
+					break;
+					case 'delete2':
+					document.myform.texttoreplace.value = "\\?.*$";
+					document.myform.replacedtext.value = "";
+					break;
+					case 'delete3':
+					document.myform.texttoreplace.value = "\.jpg(.*)";
+					document.myform.replacedtext.value = ".jpg";
+					break;
+					case 'removethumbs':
+					document.myform.texttoreplace.value = "thumb/|thumbs/|thumbnails/|thumbs_|thumbs-";
+					document.myform.replacedtext.value = "";
+					break;
+					case 'cleantracklisting':
+					document.myform.texttoreplace.value = "\-(.*?)\- |.mp3|.m4a";
+					document.myform.replacedtext.value = "";
+					document.myform.customposition.checked = "true";
+					document.myform.texttoinsert.value = ".";
+					document.myform.textposition.value = "2";
+					break;
+					case 'thelineofbestfit':
+					document.myform.texttoreplace.value = "cdn2.thelineofbestfit.com/images/made/images/remote/https_|_\\d{2,4}_\\d{2,4}";
+					document.myform.replacedtext.value = "";
+					document.myform.starttext.value = "_";
+					document.myform.endtext.value = ".";
+					break;
+					case 'smugmug':
+					document.myform.texttoreplace.value = "/S/|/M/|/L/|/XL/|/X1/|/X2/|/X3/|/X4/|/X5/";
+					document.myform.replacedtext.value = "/O/";
+					break;
+				}
+			}
+			
+			function textareaFocus() {
+				document.myform.textarea.focus();
+			}
+			
+			function clearText() {
+				document.myform.textarea.value = "";
+				textareaFocus();
+			}
+			
+			function clearSettings() {
+				document.myform.texttoreplace.value = "";
+				document.myform.replacedtext.value = "";
+				document.myform.operationsList.value = "operations";
+				document.myform.presetsList.value = "presets";
+				document.myform.matchcase.checked = false;
+				document.myform.newline.checked = false;
+				document.myform.texttoinsert.value = "";
+				document.myform.textposition.value = 0;
+				document.myform.startposition.checked = true;
+				textareaFocus();
+			}
+			
+			function selectAll(id) {
+				document.getElementById(id).focus();
+				document.getElementById(id).select();
+			}
+			
+			function openFile() {
+				var control = document.getElementById("openfile");
+				
+				control.addEventListener("change", function(event) {
+					var reader = new FileReader();
+					
+					reader.onload = function(event) {
+						var contents = event.target.result;
+						document.getElementById('textarea').value = contents;
+					};
+					
+					reader.onerror = function(event) {
+						console.error("File could not be read! Code " + event.target.error.code);
+					};
+					
+					reader.readAsText(control.files[0]);
+				}, false);
+			}
+			
+			function saveTextToFile() {
+				// grab the content of the form field and place it into a variable
+				var textToWrite = document.getElementById("textarea").value;
+				//  create a new Blob (html5 magic) that conatins the data from your form feild
+				var textFileAsBlob = new Blob([textToWrite], {type:'text/plain'});
+				// Specify the name of the file to be saved
+				var fileNameToSaveAs = "Text.txt";
+				
+				// Optionally allow the user to choose a file name by providing
+				// an imput field in the HTML and using the collected data here
+				// var fileNameToSaveAs = txtFileName.text;
+				
+				// create a link for our script to 'click'
+				var downloadLink = document.createElement("a");
+				//  supply the name of the file (from the var above).
+				// you could create the name here but using a var
+				// allows more flexability later.
+				downloadLink.download = fileNameToSaveAs;
+				// provide text for the link. This will be hidden so you
+				// can actually use anything you want.
+				downloadLink.innerHTML = "My Hidden Link";
+				
+				// allow our code to work in webkit & Gecko based browsers
+				// without the need for a if / else block.
+				window.URL = window.URL || window.webkitURL;
+				
+				// Create the link Object.
+				downloadLink.href = window.URL.createObjectURL(textFileAsBlob);
+				// when link is clicked call a function to remove it from
+				// the DOM in case user wants to save a second file.
+				downloadLink.onclick = destroyClickedElement;
+				// make sure the link is hidden.
+				downloadLink.style.display = "none";
+				// add the link to the DOM
+				document.body.appendChild(downloadLink);
+				
+				// click the new link
+				downloadLink.click();
+			}
+			
+			function destroyClickedElement(event) {
+				// remove the link from the DOM
+				document.body.removeChild(event.target);
+			}
+			
+			function replaceText() {
+				/* Set variables based on the Ids from the HTML code */
+				var textToReplace = document.getElementById('texttoreplace').value;
+				var replacedText = document.getElementById('replacedtext').value;
+				var matchCase = document.getElementById('matchcase').checked;
+				var newLine = document.getElementById('newline').checked;
+				var array = document.getElementById('textarea').value.split('\n');
+				var regex = new RegExp(textToReplace, "gi");
+				
+				if (matchCase) {
+					regex = new RegExp(textToReplace, "g");
+				}
+				
+				if (newLine) {
+					if (replacedText == "") {
+						replacedText = textToReplace + "\n";
+					}
+					else {
+						replacedText = "\n" + replacedText;
+					}
+				}
+				
+				for (var i = 0; i < array.length; i++) {
+					array[i] = array[i].replace(regex, replacedText);
+				}
+				
+				document.myform.textarea.value = array.join("\n");
+				textareaFocus();
+			}
+			
+			function insertText() {
+				/* Set variables based on the Ids from the HTML code */
+				var textToInsert = document.getElementById('texttoinsert').value;
+				var startPosition = document.getElementById('startposition').checked;
+				var endPosition = document.getElementById('endposition').checked;
+				var customPosition = document.getElementById('customposition').checked;
+				var textPosition = document.getElementById('textposition').value;
+				var array = document.getElementById('textarea').value.split('\n');
+				
+				textPosition = parseInt(textPosition);
+				
+				if (textPosition < 0) {
+					window.alert("Wrong text position.");
+				}
+				else {
+					if (endPosition) {
+						for (var i = 0; i < array.length; i++) {
+							array[i] = array[i] + textToInsert;
+						}
+					}
+					else {
+						if (startPosition) {
+							textPosition = 0;
+						}
+						
+						for (var i = 0; i < array.length; i++) {
+							array[i] = [array[i].slice(0, textPosition), textToInsert, array[i].slice(textPosition)].join('');
+						}
+					}
+				}
+				
+				document.myform.textarea.value = array.join("\n");
+				textareaFocus();
+			}
+			
+			function deleteText() {
+				/* Set variables based on the Ids from the HTML code */
+				var startText = document.getElementById('startText').value;
+				var endText = document.getElementById('endText').value;
+				var array = document.getElementById('textarea').value.split('\n');
+				var x = "";
+				var y = "";
+				
+				for (var i = 0; i < array.length; i++) {
+					x = array[i].indexOf(startText);
+					y = array[i].lastIndexOf(endText);
+					array[i] = array[i].replace(array[i].substring(x, y), '');
+				}
+				
+				document.myform.textarea.value = array.join("\n");
+				textareaFocus();
+			}
+			
+			function upperCase() {
+				var array = document.getElementById('textarea').value;
+				
+				array = array.toUpperCase();
+				document.myform.textarea.value = array;
+				textareaFocus();
+			}
+			
+			function lowerCase() {
+				var array = document.getElementById('textarea').value;
+				
+				array = array.toLowerCase();
+				document.myform.textarea.value = array;
+				textareaFocus();
+			}
+			
+			function titleCase()
+			{
+				var array = document.getElementById('textarea').value;
+				
+				array = array.replace(/\w\S*/g, function(txt) {
+					return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();
+				});
+				
+				document.myform.textarea.value = array;
+				textareaFocus();
+			}
+			
+			function deleteLine() {
+				var array = document.getElementById('textarea').value.split("\n");
+				var lineNumber = document.myform.textarea.value.substr(0, document.myform.textarea.selectionStart).split("\n").length;
+				
+				array.splice(lineNumber - 1, 1);
+				
+				document.myform.textarea.value = array.join("\n");
+				textareaFocus();
+			}
+			
+			function duplicateLine() {
+				var array = document.getElementById('textarea').value.split("\n");
+				var lineNumber = document.myform.textarea.value.substr(0, document.myform.textarea.selectionStart).split("\n").length;
+				var temp = array[lineNumber - 1];
+				
+				array.splice(lineNumber - 1, 0, temp);
+				
+				document.myform.textarea.value = array.join("\n");
+				textareaFocus();
+			}
+			
+			function sortLines() {
+				var array = document.getElementById('textarea').value.split('\n');
+				
+				array.sort(function (a, b) {
+					return a.toLowerCase().localeCompare(b.toLowerCase());
+				});
+				
+				document.myform.textarea.value = array.join("\n");
+				textareaFocus();
+			}
+			
+			function deleteBlankLines() {
+				var array = document.getElementById('textarea').value.split('\n');
+				var temp = [""];
+				var x = 0;
+				
+				for (var i = 0; i < array.length; i++) {
+					if (array[i].trim() != "") {
+						temp[x] = array[i];
+						x++;
+					}
+				}
+				
+				temp = temp.join('\n');
+				document.myform.textarea.value = temp;
+				textareaFocus();
+			}
+			
+			function deleteTrailingSpaces() {
+				var array = document.getElementById('textarea').value.split("\n");
+				
+				for (var i = 0; i < array.length; i++) {
+					array[i] = array[i].replace(/\s*$/,"");
+				}
+				
+				document.myform.textarea.value = array.join("\n");
+				textareaFocus();
+			}
+			
+			function deleteWhitespace() {
+				var array = document.getElementById('textarea').value.split("\n");
+				
+				for (var i = 0; i < array.length; i++) {
+					array[i] = array[i].trim();
+				}
+				
+				document.myform.textarea.value = array.join("\n");
+				textareaFocus();
+			}
+			
+			function urlEncode() {
+				var obj = document.getElementById('textarea');
+				var unencoded = obj.value;
+				obj.value = encodeURIComponent(unencoded).replace(/'/g,"%27").replace(/"/g,"%22");
+				
+				document.myform.textarea.value = obj.value;
+				textareaFocus();
+			}
+			
+			function urlDecode() {
+				var obj = document.getElementById('textarea');
+				var encoded = obj.value;
+				obj.value = decodeURIComponent(encoded.replace(/\+/g,  " "));
+				
+				document.myform.textarea.value = obj.value;
+				textareaFocus();
+			}
+			
+			function downloadFiles() {
+				var array = document.getElementById('textarea').value.split("\n");
+				
+				$(function() {
+					var fileIndex = 0;
+					
+					$('#download-iframe').attr('src', array[fileIndex]);
+					fileIndex++;
+					
+					var interval = setInterval(function() {
+						if(fileIndex < array.length) {
+							$('#download-iframe').attr('src', array[fileIndex]);
+							fileIndex++;
+						}
+						else {
+							clearInterval(interval);
+						}
+					}, 100);
+				});
+			}
+			
+			function getLineNumberAndColumnIndex(textarea, indicator) {
+				var textLines = textarea.value.substr(0, textarea.selectionStart).split("\n");
+				var currentLineNumber = textLines.length;
+				var currentColumnIndex = textLines[textLines.length - 1].length;
+				indicator.innerHTML = "L" + currentLineNumber + " C" + currentColumnIndex;
+			}
+		</script>
+	</body>
+</html>
