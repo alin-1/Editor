@@ -1,2 +1,2 @@
 # Editor
-Lightweight browser based text edior
+Lightweight browser based text editor
